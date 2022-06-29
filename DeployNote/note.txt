@@ -1,0 +1,10 @@
+- LDAP登入
+    - 開啟
+        - 設定application.properties
+            1. fisc.ldap.enabled=true
+            2. account.debug.enabled=false
+            3. 啟動參數要加：-Dcom.sun.jndi.ldap.object.disableEndpointIdentification=true
+    - 關閉
+        - 設定application.properties
+            1. fisc.ldap.enabled=false
+            2. account.debug.enabled=true

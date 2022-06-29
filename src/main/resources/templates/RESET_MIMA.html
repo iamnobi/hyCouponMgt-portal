@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Change Your Password For Cherri DS Portal</title>
+    <style type="text/css">
+
+        /* Center your email in Outlook.com */
+        .ExternalClass {width: 100%;}
+
+        /* Overwrite Outlook.com’s Embedded CSS */
+        table {border-collapse:separate;}
+        a, a:link, a:visited {text-decoration: none; color: #00788a;}
+        a:hover {text-decoration: underline;}
+        h2,h2 a,h2 a:visited,h3,h3 a,h3 a:visited,h4,h5,h6,.t_cht {color:#000 !important;}
+        .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td {line-height: 100%;}
+
+    </style>
+</head>
+
+<body style="background: #ddd;">
+<table>
+    <tr>
+        <td align="center" style="border-bottom: 1px solid #ccc; height: 30px;">&nbsp</td>
+    </tr>
+</table>
+<table align="center" width="500" bgcolor="#ffffff" style="padding: 10px 25px">
+    <tr>
+        <td>
+            <table style="border-bottom: 1px solid #ccc;" width="100%">
+                <tr>
+                    <td style="font-size: 16px">
+                        <p th:text="#{mail.dear-user(${name})}">親愛的Paul，</p>
+                        <p th:text="#{mail.reset-password.we-have-received-your-reset-password-request}">我們收到您的 DS Portal 帳號密碼變更請求。</p>
+                        <p th:text="#{mail.reset-password.set-password-link-instruction}">請點選以下連結以設定新密碼。</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" style="background: #1976d2; color: #fff; border: none; padding-top: 3px; padding-bottom: 3px; font-size: 16px; font-family:Arial; border-radius: 3px; cursor: pointer;" height="38">
+                        <a th:href="${resetPasswordUrl}"
+                           th:text="#{mail.reset-password.set-password-link-btn}"
+                           style="color: #fff; text-decoration: none;     display: block;">
+                            變更密碼
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p style="color: #FF5252;" th:text="#{mail.reset-password.link-expire-in-15-minutes}">
+                            此連結將於 15 分鐘後失效。
+                        </p>
+                        <p style="padding-top: 5px;" th:utext="#{mail.thanks-for-using-ds-portal}">
+                            感謝您使用 DS Portal 系統。
+                        </p>
+                    </td>
+                </tr>
+            </table>
+            <table>
+                <tr>
+                    <td style="color: #aaa; font-size: 14px">
+                        <p th:text="#{mail.no-reply-information(${mail})}">此為 DS Portal 系統自動寄給 paultsai@cherricorp.com 訊息，請勿直接回覆本郵件。</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td align="center" style="border-bottom: 1px solid #ccc; height: 30px;">&nbsp</td>
+    </tr>
+</table>
+</body>
+
+</html>

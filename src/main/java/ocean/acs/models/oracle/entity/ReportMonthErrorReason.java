@@ -1,0 +1,173 @@
+package ocean.acs.models.oracle.entity;
+
+import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.GenericGenerator;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import ocean.acs.models.data_object.entity.ReportMonthErrorReasonDO;
+import ocean.acs.models.entity.DBKey;
+
+@DynamicUpdate
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = DBKey.TABLE_REPORT_MONTH_ERROR_REASON)
+public class ReportMonthErrorReason implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GenericGenerator(name = "report_month_error_reason_seq_generator",
+            strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
+            parameters = {
+                    @org.hibernate.annotations.Parameter(name = "sequence_name",
+                            value = "RT_DAILY_ERROR_REASON_ID_SEQ"),
+                    @org.hibernate.annotations.Parameter(name = "increment_size", value = "1")})
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "report_month_error_reason_seq_generator")
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_ID)
+    private Long id;
+
+    @NonNull
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_ISSUER_BANK_ID)
+    private Long issuerBankId;
+
+    @NonNull
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_YEAR)
+    private Integer year;
+
+    @NonNull
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_MONTH)
+    private Integer month;
+
+    @NonNull
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_REASON_CODE_1)
+    private Integer reasonCode1;
+
+    @NonNull
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_REASON_COUNT_1)
+    private Integer reasonCount1;
+
+    @NonNull
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_REASON_PERCENTAGE_1)
+    private Double reasonPercentage1;
+
+    @NonNull
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_REASON_CODE_2)
+    private Integer reasonCode2;
+
+    @NonNull
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_REASON_COUNT_2)
+    private Integer reasonCount2;
+
+    @NonNull
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_REASON_PERCENTAGE_2)
+    private Double reasonPercentage2;
+
+    @NonNull
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_REASON_CODE_3)
+    private Integer reasonCode3;
+
+    @NonNull
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_REASON_COUNT_3)
+    private Integer reasonCount3;
+
+    @NonNull
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_REASON_PERCENTAGE_3)
+    private Double reasonPercentage3;
+
+    @NonNull
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_DATA_MILLIS)
+    private Long dataMillis;
+
+    @NonNull
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_SYS_CREATOR)
+    private String sysCreator;
+
+    @NonNull
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_CREATE_MILLIS)
+    private Long createMillis;
+
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_SYS_UPDATER)
+    private String sysUpdater;
+
+    @Column(name = DBKey.COL_REPORT_MONTH_ERROR_REASON_UPDATE_MILLIS)
+    private Long updateMillis;
+
+    public static ReportMonthErrorReason valueOf(ReportMonthErrorReasonDO d) {
+        return new ReportMonthErrorReason(d.getId(), d.getIssuerBankId(), d.getYear(), d.getMonth(),
+                d.getReasonCode1(), d.getReasonCount1(), d.getReasonPercentage1(),
+                d.getReasonCode2(), d.getReasonCount2(), d.getReasonPercentage2(),
+                d.getReasonCode3(), d.getReasonCount3(), d.getReasonPercentage3(),
+                d.getDataMillis(), d.getSysCreator(), d.getCreateMillis(), d.getSysUpdater(),
+                d.getUpdateMillis());
+    }
+
+    // /**
+    // * @param issuerBankId
+    // * @param queryTimeRange
+    // * @param errorReasonList 傳入此list時，須先按照失敗次數降冪排序
+    // * @param operator
+    // * @param createMillis
+    // * @return
+    // */
+    // public static ReportMonthErrorReason newInstance(Long issuerBankId, QueryTimeRange
+    // queryTimeRange,
+    // List<TxLogErrorReasonDTO> errorReasonList, String operator, long createMillis)
+    // {
+    // ReportMonthErrorReason entity = new ReportMonthErrorReason();
+    // entity.setIssuerBankId(issuerBankId);
+    // entity.setYear(queryTimeRange.getStartZonedDateTime().getYear());
+    // entity.setMonth(queryTimeRange.getStartZonedDateTime().getMonthValue());
+    //
+    // TxLogErrorReasonDTO reason1 = errorReasonList.get(0);
+    // TxLogErrorReasonDTO reason2 = errorReasonList.get(1);
+    // TxLogErrorReasonDTO reason3 = errorReasonList.get(2);
+    //
+    // final int reasonCode1 = reason1.getErrorReasonCode();
+    // final int reasonCode2 = reason2.getErrorReasonCode();
+    // final int reasonCode3 = reason3.getErrorReasonCode();
+    // entity.setReasonCode1(reasonCode1);
+    // entity.setReasonCode2(reasonCode2);
+    // entity.setReasonCode3(reasonCode3);
+    // entity.setReasonCount1(reason1.getErrorReasonCount());
+    // entity.setReasonCount2(reason2.getErrorReasonCount());
+    // entity.setReasonCount3(reason3.getErrorReasonCount());
+    //
+    // final int errorTotal =
+    // errorReasonList.stream().mapToInt(TxLogErrorReasonDTO::getErrorReasonCount).sum();
+    //
+    // Double reasonPercentage1 = (double) reason1.getErrorReasonCount() / errorTotal;
+    // Double reasonPercentage2 = (double) reason2.getErrorReasonCount() / errorTotal;
+    // Double reasonPercentage3 = (double) reason3.getErrorReasonCount() / errorTotal;
+    //
+    // reasonPercentage1 = reasonPercentage1.isNaN() ? 0.0 : reasonPercentage1 * 100;
+    // reasonPercentage2 = reasonPercentage2.isNaN() ? 0.0 : reasonPercentage2 * 100;
+    // reasonPercentage3 = reasonPercentage3.isNaN() ? 0.0 : reasonPercentage3 * 100;
+    //
+    // final DecimalFormat decimalFormat = new DecimalFormat("#.##");
+    // reasonPercentage1 = Double.parseDouble(decimalFormat.format(reasonPercentage1));
+    // reasonPercentage2 = Double.parseDouble(decimalFormat.format(reasonPercentage2));
+    // reasonPercentage3 = Double.parseDouble(decimalFormat.format(reasonPercentage3));
+    //
+    // entity.setReasonPercentage1(reasonPercentage1);
+    // entity.setReasonPercentage2(reasonPercentage2);
+    // entity.setReasonPercentage3(reasonPercentage3);
+    //
+    // entity.setDataMillis(queryTimeRange.getStartMillis());
+    // entity.setSysCreator(operator);
+    // entity.setCreateMillis(createMillis);
+    // return entity;
+    // }
+
+}

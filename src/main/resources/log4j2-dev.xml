@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Level hierarchy order : ALL > TRACE > DEBUG > INFO > WARN > ERROR > FATAL > OFF -->
+<Configuration>
+
+    <properties>
+        <property name="LOG_PATTERN" value="%d %-5p [%t] %C{2} (%F:%L) - %m%n"/>
+        <property name="LOG_PATTERN_COLOR"
+            value="%d{${LOG_DATEFORMAT_PATTERN:-yyyyMMdd HH:mm:ss.SSS}} %highlight{${LOG_LEVEL_PATTERN:-%5p}}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=green bold, TRACE=blue} %style{${sys:PID}}{magenta} [%-4line] [%15.15thread] %style{%-40.40C{1.}}{cyan} %-35.35method: %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+        <property name="LOG_HOME" value="./log"/>
+        <property name="LOG_FILE_NAME_COLOR" value="acs_portal_color"/>
+        <property name="LOG_FILE_NAME_INPUT" value="acs_portal_input"/>
+        <property name="LOG_FILE_NAME_ERROR" value="acs_portal_error"/>
+        <property name="FILE_NAME_AUDIT_LOG" value="acs_portal_audit_log"/>
+        <property name="FILE_NAME_JOB_LOG" value="acs_portal_job_log"/>
+    </properties>
+
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN_COLOR}"/>
+        </Console>
+
+        <!-- Color log file - Rolling Over File Appender -->
+        <RollingFile name="ColorRollingFileAppender"
+            fileName="${LOG_HOME}/${LOG_FILE_NAME_COLOR}.log"
+            filePattern="${LOG_HOME}/$${date:yyyy-MM}/${LOG_FILE_NAME_COLOR}-%d{yyyy-M
+                     M-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN_COLOR}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="250 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="200">
+                <Delete basePath="${LOG_HOME}" maxDepth="2">
+                    <IfFileName glob="*/${LOG_FILE_NAME_COLOR}-*.log" />
+                    <IfLastModified age="90d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <!-- Input - Rolling Over File Appender -->
+        <RollingFile name="InputRollingFileAppender"
+            fileName="${LOG_HOME}/${LOG_FILE_NAME_INPUT}.log"
+            filePattern="${LOG_HOME}/$${date:yyyy-MM}/${LOG_FILE_NAME_INPUT}-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="250 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="200">
+                <Delete basePath="${LOG_HOME}" maxDepth="2">
+                    <IfFileName glob="*/${LOG_FILE_NAME_INPUT}-*.log" />
+                    <IfLastModified age="90d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+            <Filters>
+                <ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
+        </RollingFile>
+
+        <!-- Error - Rolling Over File Appender -->
+        <RollingFile name="ErrorRollingFileAppender"
+            fileName="${LOG_HOME}/${LOG_FILE_NAME_ERROR}.log"
+            filePattern="${LOG_HOME}/$${date:yyyy-MM}/${LOG_FILE_NAME_ERROR}-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="250 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="200">
+                <Delete basePath="${LOG_HOME}" maxDepth="2">
+                    <IfFileName glob="*/${LOG_FILE_NAME_ERROR}-*.log" />
+                    <IfLastModified age="90d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+            <Filters>
+                <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </RollingFile>
+
+        <RollingFile name="AuditLogAppender"
+            fileName="${LOG_HOME}/${FILE_NAME_AUDIT_LOG}.log"
+            filePattern="${LOG_HOME}/$${date:yyyy-MM}/${FILE_NAME_AUDIT_LOG}-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="250 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="200">
+                <Delete basePath="${LOG_HOME}" maxDepth="2">
+                    <IfFileName glob="*/${FILE_NAME_AUDIT_LOG}-*.log" />
+                    <IfLastModified age="90d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="JobLogAppender"
+            fileName="${LOG_HOME}/${FILE_NAME_JOB_LOG}.log"
+            filePattern="${LOG_HOME}/$${date:yyyy-MM}/${FILE_NAME_AUDIT_LOG}-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="250 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="200">
+                <Delete basePath="${LOG_HOME}" maxDepth="2">
+                    <IfFileName glob="*/${FILE_NAME_JOB_LOG}-*.log" />
+                    <IfLastModified age="90d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="com.cherri.acs_portal.aspect" level="INFO" additivity="true">
+            <AppenderRef ref="AuditLogAppender"/>
+            <AppenderRef ref="JobLogAppender"/>
+        </Logger>
+        <Logger name="com.cherri.acs_portal.job" level="INFO" additivity="false">
+            <AppenderRef ref="JobLogAppender"/>
+        </Logger>
+        <Logger name="com.cherri.acs_kernel.plugin" level="DEBUG" additivity="true"/>
+
+        <Root level="INFO" additivity="true">
+            <AppenderRef ref="STDOUT"/>
+            <AppenderRef ref="ColorRollingFileAppender"/>
+            <AppenderRef ref="InputRollingFileAppender"/>
+            <AppenderRef ref="ErrorRollingFileAppender"/>
+        </Root>
+    </Loggers>
+
+</Configuration>

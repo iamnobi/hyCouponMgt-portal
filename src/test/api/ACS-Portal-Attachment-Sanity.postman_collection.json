@@ -1,0 +1,5111 @@
+{
+	"info": {
+		"_postman_id": "bdbad553-a3ab-4afc-a12c-9ed75079f910",
+		"name": "ACS-Portal-Attachment-Sanity",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Risk",
+			"item": [
+				{
+					"name": "Blacklist Import",
+					"item": [
+						{
+							"name": "Create",
+							"item": [
+								{
+									"name": "Login - User1",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);",
+													"pm.environment.set(\"issuerBankId\", response.data.issuerBankId);"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "2794571f-d0f3-4621-a852-4b470c647c3d",
+												"exec": [
+													"// 設定一個在審核可以用來識別的字串, 若沒有的話需要清空",
+													"pm.environment.set(\"identifySymbol\", \"\");",
+													"",
+													"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+													"pm.environment.set(\"functionType\", \"\");",
+													"",
+													"// 主要資料id",
+													"pm.environment.set(\"dataId\", \"\");",
+													"// 相關子模組id",
+													"pm.environment.set(\"subDataId\", \"\");"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN1",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Data - Create",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "3dd47861-5f3e-45fa-9969-bbe8fc06359d",
+												"exec": [
+													"var d = new Date();",
+													"var n = d.getTime();",
+													"// 設定一個在審核可以用來識別的字串",
+													"var identifySymbol = \"batchName_\"+n;",
+													"",
+													"pm.environment.set(\"identifySymbol\", identifySymbol);",
+													"",
+													"pm.environment.set(\"functionType\", \"BLACK_LIST_BATCH_IMPORT\");",
+													"pm.environment.set(\"blacklistImport.batchName\", identifySymbol);"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"id": "efb68d3e-3e03-42e4-9092-4305f9988dcc",
+												"exec": [
+													"var dataId = 0;",
+													"",
+													"const response = pm.response.json();",
+													"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"AUDITING\" &&",
+													"response.data.id !== undefined) {",
+													"    pm.environment.set(\"auditId\", response.data.id); ",
+													"    dataId = response.data.id;",
+													"} else if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+													"response.data.id !== undefined){",
+													"    pm.environment.set(\"dataId\", response.data.id); ",
+													"    dataId = response.data.id;",
+													"}",
+													"",
+													"pm.test(\"Create Request Completed.\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    pm.expect(dataId).not.equal(0);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "batchName",
+													"value": "{{blacklistImport.batchName}}",
+													"type": "text"
+												},
+												{
+													"key": "authStatus",
+													"value": "N",
+													"description": "C, N, R (Challenge, No Authentication, Rejected)",
+													"type": "text"
+												},
+												{
+													"key": "panList",
+													"type": "file",
+													"src": "/var/lib/jenkins/workspace/FISC-TEST/build-dev-acs-portal-fisc/src/test/api/attachment/blacklist_sample.csv"
+												},
+												{
+													"key": "issuerBankId",
+													"value": "{{issuerBankId}}",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/risk/blacklist/batch/pan",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"risk",
+												"blacklist",
+												"batch",
+												"pan"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Login - User2",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);",
+													"",
+													"pm.environment.set(\"issuerBankId\", response.data.issuerBankId);",
+													"console.log(\"functionType: \" + pm.environment.get(\"functionType\"));",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN2",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing - Query All with\bout self",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "500674dd-c2ab-4931-8855-ed7545904c31",
+												"exec": [
+													"const response = pm.response.json();",
+													"var len = response.data.length;",
+													"var auditId = 0;",
+													"",
+													"var identifySymbol = pm.environment.get(\"identifySymbol\") || \"\";",
+													"",
+													"if(identifySymbol.length > 0) {",
+													"    for(var i = 0; i < len; i++) {",
+													"        if(response.data[i].draftContent.indexOf(identifySymbol) < 0) continue;",
+													"           ",
+													"        auditId = response.data[i].auditId;",
+													"        break;",
+													"    }    ",
+													"} else {",
+													"    auditId = response.data[0].auditId;",
+													"}",
+													"",
+													"",
+													"var functionType = pm.environment.get(\"functionType\"); ",
+													"pm.test(functionType + \" query auditing list completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    ",
+													"    if(identifySymbol !== \"\") {",
+													"        pm.expect(pm.response.text()).to.include(identifySymbol);        ",
+													"    }",
+													"",
+													"    pm.expect(auditId).not.equal(0);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "3a5ff1b7-d067-4783-85d6-25da86db69bb",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"functionType\": \"{{functionType}}\",\n\t\"issuerBankId\": {{issuerBankId}},\n\t\"page\": 0,\n\t\"pageSize\": 4\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/list",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"list"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing - Signing Create Published",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "2615cf4c-93b1-4f69-8fb5-86888a90d0c4",
+												"exec": [
+													"const response = pm.response.json();",
+													"var dataId = 0;",
+													"",
+													"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+													"response.data.id !== undefined){",
+													"    dataId = response.data.id;",
+													"    pm.environment.set(\"dataId\", response.data.id); ",
+													"}",
+													"",
+													"pm.test(\"Data Stored.\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    pm.expect(dataId).not.equal(0);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"auditId\": \"{{auditId}}\",\n    \"issuerBankId\": \"{{issuerBankId}}\", \n    \"functionType\": \"{{functionType}}\",\n    \"auditStatus\": \"P\",\n    \"comment\": \"create published\"\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/signing",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"signing"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing List - Without Insert one Copy",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "500674dd-c2ab-4931-8855-ed7545904c31",
+												"exec": [
+													"const response = pm.response.json();",
+													"var len = response.data.length;",
+													"var authId = 0;",
+													"const identifySymbol = pm.environment.get(\"identifySymbol\");",
+													"",
+													"pm.test(\"Insert Request Removed\", function() {",
+													"    pm.expect(pm.response.text()).to.not.include(identifySymbol);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "3a5ff1b7-d067-4783-85d6-25da86db69bb",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"functionType\": \"{{functionType}}\",\n\t\"issuerBankId\": {{issuerBankId}},\n\t\"page\": 0,\n\t\"pageSize\": 4\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/list",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"list"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Query",
+							"item": [
+								{
+									"name": "BlackList - Query Batch",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "7a757c8e-9671-4b30-bec7-afc85e5a9bb8",
+												"exec": [
+													"const response = pm.response.json();",
+													"",
+													"var functionType = pm.environment.get(\"functionType\"); ",
+													"pm.test(functionType + \"query success\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    var dataLen = 0;",
+													"    if(response.data !== undefined) dataLen = response.data.length;",
+													"    ",
+													"    pm.expect(dataLen).not.equal(0);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "x-csrf-token",
+												"value": "{{acs-csrf-token}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"issuerBankId\": \"{{issuerBankId}}\",\n    \"page\": 1,\n    \"pageSize\": 4\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/risk/blacklist/batch/query",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"risk",
+												"blacklist",
+												"batch",
+												"query"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Update",
+							"item": [
+								{
+									"name": "Login - User1",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);",
+													"pm.environment.set(\"issuerBankId\", response.data.issuerBankId);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN1",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Data - Update",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "a4df8dd4-d5bf-41aa-aff6-59ef95592168",
+												"exec": [
+													"var oriSymbol = pm.environment.get(\"identifySymbol\");",
+													"var freshIdentifySymbol = \"UD_\" + oriSymbol;",
+													"",
+													"pm.environment.set(\"identifySymbol\", freshIdentifySymbol);",
+													"pm.environment.set(\"blacklistImport.batchName\", freshIdentifySymbol);",
+													""
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"id": "e5c19a67-b4d6-4047-941d-dbe4691df72c",
+												"exec": [
+													"const response = pm.response.json();",
+													"var dataId = 0;",
+													"",
+													"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"AUDITING\" &&",
+													"response.data.id !== undefined) {",
+													"    pm.environment.set(\"auditId\", response.data.id); ",
+													"    dataId = response.data.id;",
+													"} else if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+													"response.data.id !== undefined){",
+													"    pm.environment.set(\"dataId\", response.data.id); ",
+													"    dataId = response.data.id;",
+													"}",
+													"",
+													"pm.test(\"Update Request Completed.\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    pm.expect(dataId).not.equal(0);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"id\": \"{{dataId}}\",\n\t\"issuerBankId\": \"{{issuerBankId}}\",\n\t\"batchName\": \"{{blacklistImport.batchName}}\",\n\t\"authStatus\": \"R\"\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/risk/blacklist/batch/pan/update",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"risk",
+												"blacklist",
+												"batch",
+												"pan",
+												"update"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Login - User2",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);",
+													"pm.environment.set(\"issuerBankId\", response.data.issuerBankId);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN2",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing - Signing Update Published",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "e11500cd-7a1f-4753-a9a6-83e4987144f2",
+												"exec": [
+													"const response = pm.response.json();",
+													"var dataId = 0;",
+													"",
+													"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+													"response.data.id !== undefined) {",
+													"    pm.globals.set(\"dataId\", response.data.id); ",
+													"    dataId = response.data.id;",
+													"    console.log(\"dataId: \" + dataId);",
+													"}",
+													"",
+													"pm.test(\"Sign Update Completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    pm.expect(dataId).not.equal(0);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"auditId\": \"{{auditId}}\",\n    \"issuerBankId\": \"{{issuerBankId}}\", \n    \"functionType\": \"{{functionType}}\",\n    \"auditStatus\": \"P\",\n    \"comment\": \"update published\"\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/signing",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"signing"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Delete",
+							"item": [
+								{
+									"name": "Login - User1",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);",
+													"pm.environment.set(\"issuerBankId\", response.data.issuerBankId);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN1",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Data - Delete",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "36820186-7ca1-42da-81d5-af1caddde494",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"id": "779310dc-48be-443a-94db-ac8302fd9a0a",
+												"exec": [
+													"const response = pm.response.json();",
+													"",
+													"pm.test(\"Delete Request Completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"issuerBankId\": {{issuerBankId}},\n\t \"id\": \"{{dataId}}\"\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/risk/blacklist/batch/pan/delete",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"risk",
+												"blacklist",
+												"batch",
+												"pan",
+												"delete"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Login - User2",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);",
+													"pm.environment.set(\"issuerBankId\", response.data.issuerBankId);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN2",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing - Signing Delete Published",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "03b8c7ef-56b2-4966-836a-f5c23b42cd3d",
+												"exec": [
+													"pm.test(\"Signing Delete Approve completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"auditId\": \"{{auditId}}\",\n    \"issuerBankId\": \"{{issuerBankId}}\", \n    \"functionType\": \"{{functionType}}\",\n    \"auditStatus\": \"P\",\n    \"comment\": \"Delete published\"\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/signing",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"signing"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"_postman_isSubFolder": true
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f853d253-92c0-4931-866c-67bf6976f4a1",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "68e132d9-4406-46e1-847d-8e26031f42f4",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "System Setting",
+					"item": [
+						{
+							"name": "發卡行商標",
+							"item": [
+								{
+									"name": "Query",
+									"item": [
+										{
+											"name": "Login - User1",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+														"exec": [
+															"const response = pm.response.json();",
+															"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "63ace727-b780-40a3-9ebf-7966ab72366e",
+														"exec": [
+															"// 設定一個在審核可以用來識別的字串, 若沒有的話需要清空",
+															"pm.environment.set(\"identifySymbol\", \"\");",
+															"",
+															"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+															"pm.environment.set(\"functionType\", \"\");",
+															"",
+															"// 主要資料id",
+															"pm.environment.set(\"dataId\", \"\");",
+															"// 相關子模組id",
+															"pm.environment.set(\"subDataId\", \"\");"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"type": "text",
+														"value": "application/x-www-form-urlencoded"
+													}
+												],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "account",
+															"value": "SYSTEMADMIN1",
+															"type": "text"
+														},
+														{
+															"key": "password",
+															"value": "password",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/login",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"login"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "取得發卡行logo",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "7a757c8e-9671-4b30-bec7-afc85e5a9bb8",
+														"exec": [
+															"var functionType = pm.environment.get(\"functionType\"); ",
+															"pm.test(functionType + \"query success\", function(){",
+															"    pm.response.to.have.status(200);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "f1d94d2c-eb63-4bd9-af6d-09f1874a975b",
+														"exec": [
+															"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+															"pm.environment.set(\"functionType\", \"SYS_ISSUER_LOGO\");",
+															"",
+															"pm.environment.set(\"issuerLogoBankId\", 1);"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Content-Type",
+														"type": "text",
+														"value": "application/json"
+													},
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													}
+												],
+												"body": {
+													"mode": "formdata",
+													"formdata": []
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/system-setting/issuer/logo/{{issuerLogoBankId}}",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"system-setting",
+														"issuer",
+														"logo",
+														"{{issuerLogoBankId}}"
+													]
+												}
+											},
+											"response": []
+										}
+									],
+									"_postman_isSubFolder": true
+								}
+							],
+							"_postman_isSubFolder": true
+						}
+					],
+					"_postman_isSubFolder": true
+				}
+			]
+		},
+		{
+			"name": "CertificateManager",
+			"item": [
+				{
+					"name": "SSL憑證",
+					"item": [
+						{
+							"name": "upload SSL憑證",
+							"item": [
+								{
+									"name": "upload SSL",
+									"item": [
+										{
+											"name": "Login - User",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+														"exec": [
+															"const response = pm.response.json();",
+															"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);",
+															"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+															"pm.environment.set(\"functionType\", \"SYS_SSL_CERT\");"
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "52bba009-b282-4cc6-8902-4a4ee13bad39",
+														"exec": [
+															"// 設定一個在審核可以用來識別的字串, 若沒有的話需要清空",
+															"pm.environment.set(\"identifySymbol\", \"\");",
+															"",
+															"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+															"pm.environment.set(\"functionType\", \"\");",
+															"",
+															"// 主要資料id",
+															"pm.environment.set(\"dataId\", \"\");",
+															"// 相關子模組id",
+															"pm.environment.set(\"subDataId\", \"\");"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"type": "text",
+														"value": "application/x-www-form-urlencoded"
+													}
+												],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "account",
+															"value": "SYSTEMADMIN1",
+															"type": "text"
+														},
+														{
+															"key": "password",
+															"value": "password",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/login",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"login"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "產生tmp key",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "874f598e-b1a7-40fc-b745-60d21d0f90f0",
+														"exec": [
+															"",
+															"const response = pm.response.json();",
+															"var haveCsr = false;",
+															"if (response.data !== undefined && response.data.indexOf('BEGIN CERTIFICATE REQUEST') > -1) {",
+															"    haveCsr = true;",
+															"}",
+															"",
+															"pm.test(\"Create Request Completed\", function(){",
+															"    pm.response.to.have.status(200);",
+															"    pm.expect(haveCsr).not.equal(false);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "7bad7b60-6ee5-4b49-a53e-7e44c65743e1",
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													},
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"cardBrand\" : \"VISA\",\n    \"country\": \"T\",\n    \"organization\": \"CC\",\n    \"organizationUnit\": \"K\",\n    \"commonName\": \"V\",\n    \"locality\": \"T\",\n    \"stateOrProvince\": \"X\"\n}\n"
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/certificate-management/ssl/gen-key",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"certificate-management",
+														"ssl",
+														"gen-key"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "上傳SSL Certificate",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "874f598e-b1a7-40fc-b745-60d21d0f90f0",
+														"exec": [
+															"",
+															"var dataId = 0;",
+															"",
+															"const response = pm.response.json();",
+															"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"AUDITING\" &&",
+															"response.data.id !== undefined) {",
+															"    pm.environment.set(\"auditId\", response.data.id); ",
+															"    var auditId = response.data.id;",
+															"    dataId = response.data.id;",
+															"} else if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+															"response.data.id !== undefined){",
+															"        dataId = response.data.id;",
+															"}",
+															"",
+															"pm.test(\"Create Request Completed\", function(){",
+															"    pm.response.to.have.status(200);",
+															"    pm.expect(dataId).not.equal(0);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "7bad7b60-6ee5-4b49-a53e-7e44c65743e1",
+														"exec": [
+															"",
+															"// 設定一個在審核可以用來識別的字串, 若沒有的話需要清空",
+															"pm.environment.set(\"identifySymbol\", \"\");",
+															"",
+															"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+															"pm.environment.set(\"functionType\", \"SYS_SSL_CERT\");",
+															"",
+															"// 主要資料id",
+															"pm.environment.set(\"dataId\", \"\");",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													}
+												],
+												"body": {
+													"mode": "formdata",
+													"formdata": [
+														{
+															"key": "certificate",
+															"type": "file",
+															"src": "/var/lib/jenkins/workspace/FISC-TEST/build-dev-acs-portal-fisc/src/test/api/attachment/acs_client.crt"
+														},
+														{
+															"key": "cardBrand",
+															"value": "VISA",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/certificate-management/ssl/upload/cert",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"certificate-management",
+														"ssl",
+														"upload",
+														"cert"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Login - User2",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+														"exec": [
+															"const response = pm.response.json();",
+															"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"type": "text",
+														"value": "application/x-www-form-urlencoded"
+													}
+												],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "account",
+															"value": "SYSTEMADMIN2",
+															"type": "text"
+														},
+														{
+															"key": "password",
+															"value": "password",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/login",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"login"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Auditing - Query All with\bout self",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "500674dd-c2ab-4931-8855-ed7545904c31",
+														"exec": [
+															"const response = pm.response.json();",
+															"var len = response.data.length;",
+															"console.log(response.data)",
+															"var auditId = 0;",
+															"",
+															"var identifySymbol = pm.environment.get(\"identifySymbol\") || \"\";",
+															"console.log(\"identifySymbol: \" + identifySymbol);",
+															"if(identifySymbol.length > 0) {",
+															"    for(var i = 0; i < len; i++) {",
+															"        if(response.data[i].draftContent.indexOf(identifySymbol) < 0) continue;",
+															"           ",
+															"        auditId = response.data[i].auditId;",
+															"        break;",
+															"    }    ",
+															"} else {",
+															"    auditId = response.data[0].auditId;",
+															"}",
+															"pm.globals.set(\"auditId\", auditId)",
+															"",
+															"var functionType = pm.environment.get(\"functionType\"); ",
+															"pm.test(functionType + \" query auditing list completed\", function(){",
+															"    pm.response.to.have.status(200);",
+															"    ",
+															"    if(identifySymbol !== \"\") {",
+															"        pm.expect(pm.response.text()).to.include(identifySymbol);        ",
+															"    }",
+															"",
+															"    pm.expect(auditId).not.equal(0);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "3a5ff1b7-d067-4783-85d6-25da86db69bb",
+														"exec": [
+															"",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"type": "text",
+														"value": "application/json"
+													},
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n\t\"functionType\": \"{{functionType}}\",\n\t\"issuerBankId\": \"{{orgBankId}}\",\n\t\"page\": 0,\n\t\"pageSize\": 4\n}"
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/auditing/list",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"auditing",
+														"list"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Auditing - Signing Create Published Copy",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "2615cf4c-93b1-4f69-8fb5-86888a90d0c4",
+														"exec": [
+															"const response = pm.response.json();",
+															"var dataId = 0;",
+															"",
+															"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+															"response.data.id !== undefined){",
+															"    dataId = response.data.id;",
+															"    pm.environment.set(\"dataId\", response.data.id); ",
+															"}",
+															"",
+															"pm.test(\"Signing Create Approve completed. Data Stored.\", function(){",
+															"    pm.response.to.have.status(200);",
+															"    pm.expect(dataId).not.equal(0);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"type": "text",
+														"value": "application/json"
+													},
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"auditId\": \"{{auditId}}\",\n    \"issuerBankId\": \"{{orgBankId}}\", \n    \"functionType\": \"{{functionType}}\",\n    \"auditStatus\": \"P\",\n    \"comment\": \"create published\"\n}"
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/auditing/signing",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"auditing",
+														"signing"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Auditing List - Without Insert one Copy",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "500674dd-c2ab-4931-8855-ed7545904c31",
+														"exec": [
+															"const response = pm.response.json();",
+															"var len = response.data.length;",
+															"const identifySymbol = pm.environment.get(\"identifySymbol\");",
+															"",
+															"var isAuditItemStillThere = false;",
+															"var auditId = pm.environment.get(\"auditId\"); ",
+															"",
+															"for(var i = 0; i < len; i++) {",
+															"    if(response.data[0].auditId !== auditId) continue;",
+															"    ",
+															"    isAuditItemStillThere = true;",
+															"}",
+															"pm.test(\"Insert Request Removed\", function() {",
+															"    pm.response.to.have.status(200);",
+															"    pm.expect(isAuditItemStillThere).to.equal(false);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "3a5ff1b7-d067-4783-85d6-25da86db69bb",
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"type": "text",
+														"value": "application/json"
+													},
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n\t\"functionType\": \"{{functionType}}\",\n\t\"issuerBankId\": \"{{orgBankId}}\",\n\t\"page\": 0,\n\t\"pageSize\": 4\n}"
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/auditing/list",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"auditing",
+														"list"
+													]
+												}
+											},
+											"response": []
+										}
+									],
+									"_postman_isSubFolder": true
+								},
+								{
+									"name": "query SSL Certificate",
+									"item": [
+										{
+											"name": "查詢 SSL Certificate",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "b708c4b1-f7c4-469f-9398-be6188b0d922",
+														"exec": [
+															"const response = pm.response.json();",
+															"",
+															"pm.test(\"Query Request Completed\", function(){",
+															"    pm.response.to.have.status(200);",
+															"    pm.expect(pm.environment.get(\"dataId\")).equal(response.data.id);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"type": "text",
+														"value": "application/json"
+													},
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													}
+												],
+												"url": {
+													"raw": "{{portal-url}}/auth/certificate-management/ssl/VISA",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"certificate-management",
+														"ssl",
+														"VISA"
+													]
+												}
+											},
+											"response": []
+										}
+									],
+									"_postman_isSubFolder": true
+								},
+								{
+									"name": "renew SSL",
+									"item": [
+										{
+											"name": "Login - User Copy",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+														"exec": [
+															"const response = pm.response.json();",
+															"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "7b42d786-9739-48b7-acff-c0b19ea7e083",
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"type": "text",
+														"value": "application/x-www-form-urlencoded"
+													}
+												],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "account",
+															"value": "SYSTEMADMIN1",
+															"type": "text"
+														},
+														{
+															"key": "password",
+															"value": "password",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/login",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"login"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "更新 tmp key Copy",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "874f598e-b1a7-40fc-b745-60d21d0f90f0",
+														"exec": [
+															"",
+															"const response = pm.response.json();",
+															"var haveCsr = false;",
+															"if (response.data !== undefined && response.data.indexOf('BEGIN CERTIFICATE REQUEST') > -1) {",
+															"    haveCsr = true;",
+															"}",
+															"",
+															"pm.test(\"Create Request Completed\", function(){",
+															"    pm.response.to.have.status(200);",
+															"    pm.expect(haveCsr).not.equal(false);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "7bad7b60-6ee5-4b49-a53e-7e44c65743e1",
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													},
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"cardBrand\" : \"VISA\",\n    \"country\": \"T\",\n    \"organization\": \"CC\",\n    \"organizationUnit\": \"K\",\n    \"commonName\": \"V\",\n    \"locality\": \"T\",\n    \"stateOrProvince\": \"X\"\n}\n"
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/certificate-management/ssl/renew/key",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"certificate-management",
+														"ssl",
+														"renew",
+														"key"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "更新 SSL Certificate Copy",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "874f598e-b1a7-40fc-b745-60d21d0f90f0",
+														"exec": [
+															"",
+															"var dataId = 0;",
+															"",
+															"const response = pm.response.json();",
+															"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"AUDITING\" &&",
+															"response.data.id !== undefined) {",
+															"    pm.environment.set(\"auditId\", response.data.id); ",
+															"    var auditId = response.data.id;",
+															"    dataId = response.data.id;",
+															"} else if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+															"response.data.id !== undefined){",
+															"        dataId = response.data.id;",
+															"}",
+															"",
+															"pm.test(\"Create Request Completed\", function(){",
+															"    pm.response.to.have.status(200);",
+															"    pm.expect(dataId).not.equal(0);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "7bad7b60-6ee5-4b49-a53e-7e44c65743e1",
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													}
+												],
+												"body": {
+													"mode": "formdata",
+													"formdata": [
+														{
+															"key": "certificate",
+															"type": "file",
+															"src": "/var/lib/jenkins/workspace/FISC-TEST/build-dev-acs-portal-fisc/src/test/api/attachment/acs_client.crt"
+														},
+														{
+															"key": "cardBrand",
+															"value": "VISA",
+															"type": "text"
+														},
+														{
+															"key": "id",
+															"value": "{{dataId}}",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/certificate-management/ssl/renew/cert",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"certificate-management",
+														"ssl",
+														"renew",
+														"cert"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Login - User2 Copy",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+														"exec": [
+															"const response = pm.response.json();",
+															"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"type": "text",
+														"value": "application/x-www-form-urlencoded"
+													}
+												],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "account",
+															"value": "SYSTEMADMIN2",
+															"type": "text"
+														},
+														{
+															"key": "password",
+															"value": "password",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/login",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"login"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Auditing - Signing Create Published Copy Copy",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "2615cf4c-93b1-4f69-8fb5-86888a90d0c4",
+														"exec": [
+															"const response = pm.response.json();",
+															"var dataId = 0;",
+															"",
+															"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+															"response.data.id !== undefined){",
+															"    dataId = response.data.id;",
+															"    pm.environment.set(\"dataId\", response.data.id); ",
+															"}",
+															"",
+															"pm.test(\"Signing Create Approve completed. Data Stored.\", function(){",
+															"    pm.response.to.have.status(200);",
+															"    pm.expect(dataId).not.equal(0);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"type": "text",
+														"value": "application/json"
+													},
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"auditId\": \"{{auditId}}\",\n    \"issuerBankId\": \"{{orgBankId}}\", \n    \"functionType\": \"{{functionType}}\",\n    \"auditStatus\": \"P\",\n    \"comment\": \"create published\"\n}"
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/auditing/signing",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"auditing",
+														"signing"
+													]
+												}
+											},
+											"response": []
+										}
+									],
+									"_postman_isSubFolder": true
+								}
+							],
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "upload SSL P12憑證",
+							"item": [
+								{
+									"name": "upload SSL P12",
+									"item": [
+										{
+											"name": "Login - User",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+														"exec": [
+															"const response = pm.response.json();",
+															"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "d7261323-76e9-44ba-9375-a7cbe0d98c23",
+														"exec": [
+															"// 設定一個在審核可以用來識別的字串, 若沒有的話需要清空",
+															"pm.environment.set(\"identifySymbol\", \"\");",
+															"",
+															"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+															"pm.environment.set(\"functionType\", \"\");",
+															"",
+															"// 主要資料id",
+															"pm.environment.set(\"dataId\", \"\");",
+															"// 相關子模組id",
+															"pm.environment.set(\"subDataId\", \"\");"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"type": "text",
+														"value": "application/x-www-form-urlencoded"
+													}
+												],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "account",
+															"value": "SYSTEMADMIN1",
+															"type": "text"
+														},
+														{
+															"key": "password",
+															"value": "password",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/login",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"login"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "上傳SSL P12 Certificate",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "874f598e-b1a7-40fc-b745-60d21d0f90f0",
+														"exec": [
+															"",
+															"var dataId = 0;",
+															"",
+															"const response = pm.response.json();",
+															"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"AUDITING\" &&",
+															"response.data.id !== undefined) {",
+															"    pm.environment.set(\"auditId\", response.data.id); ",
+															"    var auditId = response.data.id;",
+															"    dataId = response.data.id;",
+															"} else if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+															"response.data.id !== undefined){",
+															"        dataId = response.data.id;",
+															"}",
+															"",
+															"pm.test(\"Create Request Completed\", function(){",
+															"    pm.response.to.have.status(200);",
+															"    pm.expect(dataId).not.equal(0);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "7bad7b60-6ee5-4b49-a53e-7e44c65743e1",
+														"exec": [
+															"",
+															"// 設定一個在審核可以用來識別的字串, 若沒有的話需要清空",
+															"pm.environment.set(\"identifySymbol\", \"\");",
+															"",
+															"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+															"pm.environment.set(\"functionType\", \"SYS_SSL_P12_CERT\");",
+															"",
+															"// 主要資料id",
+															"pm.environment.set(\"dataId\", \"\");",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													}
+												],
+												"body": {
+													"mode": "formdata",
+													"formdata": [
+														{
+															"key": "p12",
+															"type": "file",
+															"src": "/var/lib/jenkins/workspace/FISC-TEST/build-dev-acs-portal-fisc/src/test/api/attachment/acs_client.p12"
+														},
+														{
+															"key": "password",
+															"value": "123456",
+															"type": "text"
+														},
+														{
+															"key": "cardBrand",
+															"value": "VISA",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/certificate-management/ssl/upload/p12",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"certificate-management",
+														"ssl",
+														"upload",
+														"p12"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Login - User2",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+														"exec": [
+															"const response = pm.response.json();",
+															"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"type": "text",
+														"value": "application/x-www-form-urlencoded"
+													}
+												],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "account",
+															"value": "SYSTEMADMIN2",
+															"type": "text"
+														},
+														{
+															"key": "password",
+															"value": "password",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/login",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"login"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Auditing - Query All with\bout self",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "500674dd-c2ab-4931-8855-ed7545904c31",
+														"exec": [
+															"const response = pm.response.json();",
+															"var len = response.data.length;",
+															"console.log(response.data)",
+															"var auditId = 0;",
+															"",
+															"var identifySymbol = pm.environment.get(\"identifySymbol\") || \"\";",
+															"console.log(\"identifySymbol: \" + identifySymbol);",
+															"if(identifySymbol.length > 0) {",
+															"    for(var i = 0; i < len; i++) {",
+															"        if(response.data[i].draftContent.indexOf(identifySymbol) < 0) continue;",
+															"           ",
+															"        auditId = response.data[i].auditId;",
+															"        break;",
+															"    }    ",
+															"} else {",
+															"    auditId = response.data[0].auditId;",
+															"}",
+															"pm.globals.set(\"auditId\", auditId)",
+															"",
+															"var functionType = pm.environment.get(\"functionType\"); ",
+															"pm.test(functionType + \" query auditing list completed\", function(){",
+															"    pm.response.to.have.status(200);",
+															"    ",
+															"    if(identifySymbol !== \"\") {",
+															"        pm.expect(pm.response.text()).to.include(identifySymbol);        ",
+															"    }",
+															"",
+															"    pm.expect(auditId).not.equal(0);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "3a5ff1b7-d067-4783-85d6-25da86db69bb",
+														"exec": [
+															"",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"type": "text",
+														"value": "application/json"
+													},
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n\t\"functionType\": \"{{functionType}}\",\n\t\"issuerBankId\": \"{{orgBankId}}\",\n\t\"page\": 0,\n\t\"pageSize\": 4\n}"
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/auditing/list",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"auditing",
+														"list"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Auditing - Signing Create Published",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "2615cf4c-93b1-4f69-8fb5-86888a90d0c4",
+														"exec": [
+															"const response = pm.response.json();",
+															"var dataId = 0;",
+															"",
+															"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+															"response.data.id !== undefined){",
+															"    dataId = response.data.id;",
+															"    pm.environment.set(\"dataId\", response.data.id); ",
+															"}",
+															"",
+															"pm.test(\"Signing Create Approve completed. Data Stored.\", function(){",
+															"    pm.response.to.have.status(200);",
+															"    pm.expect(dataId).not.equal(0);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"type": "text",
+														"value": "application/json"
+													},
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"auditId\": \"{{auditId}}\",\n    \"issuerBankId\": \"{{orgBankId}}\", \n    \"functionType\": \"{{functionType}}\",\n    \"auditStatus\": \"P\",\n    \"comment\": \"create published\"\n}"
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/auditing/signing",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"auditing",
+														"signing"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Auditing List - Without Insert one",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "500674dd-c2ab-4931-8855-ed7545904c31",
+														"exec": [
+															"const response = pm.response.json();",
+															"var len = response.data.length;",
+															"const identifySymbol = pm.environment.get(\"identifySymbol\");",
+															"",
+															"var isAuditItemStillThere = false;",
+															"var auditId = pm.environment.get(\"auditId\"); ",
+															"",
+															"for(var i = 0; i < len; i++) {",
+															"    if(response.data[0].auditId !== auditId) continue;",
+															"    ",
+															"    isAuditItemStillThere = true;",
+															"}",
+															"pm.test(\"Insert Request Removed\", function() {",
+															"    pm.response.to.have.status(200);",
+															"    pm.expect(isAuditItemStillThere).to.equal(false);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "3a5ff1b7-d067-4783-85d6-25da86db69bb",
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"type": "text",
+														"value": "application/json"
+													},
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n\t\"functionType\": \"{{functionType}}\",\n\t\"issuerBankId\": \"{{orgBankId}}\",\n\t\"page\": 0,\n\t\"pageSize\": 4\n}"
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/auditing/list",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"auditing",
+														"list"
+													]
+												}
+											},
+											"response": []
+										}
+									],
+									"_postman_isSubFolder": true
+								},
+								{
+									"name": "query SSL Certificate",
+									"item": [
+										{
+											"name": "查詢 SSL Certificate",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "b708c4b1-f7c4-469f-9398-be6188b0d922",
+														"exec": [
+															"const response = pm.response.json();",
+															"",
+															"pm.test(\"Query Request Completed\", function(){",
+															"    pm.response.to.have.status(200);",
+															"    pm.expect(pm.environment.get(\"dataId\")).equal(response.data.id);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"type": "text",
+														"value": "application/json"
+													},
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													}
+												],
+												"url": {
+													"raw": "{{portal-url}}/auth/certificate-management/ssl/VISA",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"certificate-management",
+														"ssl",
+														"VISA"
+													]
+												}
+											},
+											"response": []
+										}
+									],
+									"_postman_isSubFolder": true
+								},
+								{
+									"name": "renew SSL P12",
+									"item": [
+										{
+											"name": "Login - User",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+														"exec": [
+															"const response = pm.response.json();",
+															"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "840f3c68-495b-44e6-8f47-b1655e82cff8",
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"type": "text",
+														"value": "application/x-www-form-urlencoded"
+													}
+												],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "account",
+															"value": "SYSTEMADMIN1",
+															"type": "text"
+														},
+														{
+															"key": "password",
+															"value": "password",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/login",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"login"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "更新SSL P12 Certificate",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "874f598e-b1a7-40fc-b745-60d21d0f90f0",
+														"exec": [
+															"",
+															"var dataId = 0;",
+															"",
+															"const response = pm.response.json();",
+															"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"AUDITING\" &&",
+															"response.data.id !== undefined) {",
+															"    pm.environment.set(\"auditId\", response.data.id); ",
+															"    var auditId = response.data.id;",
+															"    dataId = response.data.id;",
+															"} else if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+															"response.data.id !== undefined){",
+															"        dataId = response.data.id;",
+															"}",
+															"",
+															"pm.test(\"Create Request Completed\", function(){",
+															"    pm.response.to.have.status(200);",
+															"    pm.expect(dataId).not.equal(0);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "7bad7b60-6ee5-4b49-a53e-7e44c65743e1",
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													}
+												],
+												"body": {
+													"mode": "formdata",
+													"formdata": [
+														{
+															"key": "p12",
+															"type": "file",
+															"src": "/var/lib/jenkins/workspace/FISC-TEST/build-dev-acs-portal-fisc/src/test/api/attachment/acs_client.p12"
+														},
+														{
+															"key": "password",
+															"value": "123456",
+															"type": "text"
+														},
+														{
+															"key": "id",
+															"value": "{{dataId}}",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/certificate-management/ssl/VISA/renew/p12",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"certificate-management",
+														"ssl",
+														"VISA",
+														"renew",
+														"p12"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Login - User2",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+														"exec": [
+															"const response = pm.response.json();",
+															"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"type": "text",
+														"value": "application/x-www-form-urlencoded"
+													}
+												],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "account",
+															"value": "SYSTEMADMIN2",
+															"type": "text"
+														},
+														{
+															"key": "password",
+															"value": "password",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/login",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"login"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Auditing - Signing Create Published",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "2615cf4c-93b1-4f69-8fb5-86888a90d0c4",
+														"exec": [
+															"const response = pm.response.json();",
+															"var dataId = 0;",
+															"",
+															"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+															"response.data.id !== undefined){",
+															"    dataId = response.data.id;",
+															"    pm.environment.set(\"dataId\", response.data.id); ",
+															"}",
+															"",
+															"pm.test(\"Signing Create Approve completed. Data Stored.\", function(){",
+															"    pm.response.to.have.status(200);",
+															"    pm.expect(dataId).not.equal(0);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"type": "text",
+														"value": "application/json"
+													},
+													{
+														"key": "x-csrf-token",
+														"type": "text",
+														"value": "{{acs-csrf-token}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"auditId\": \"{{auditId}}\",\n    \"issuerBankId\": \"{{orgBankId}}\", \n    \"functionType\": \"{{functionType}}\",\n    \"auditStatus\": \"P\",\n    \"comment\": \"create published\"\n}"
+												},
+												"url": {
+													"raw": "{{portal-url}}/auth/auditing/signing",
+													"host": [
+														"{{portal-url}}"
+													],
+													"path": [
+														"auth",
+														"auditing",
+														"signing"
+													]
+												}
+											},
+											"response": []
+										}
+									],
+									"_postman_isSubFolder": true
+								}
+							],
+							"_postman_isSubFolder": true
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "CA憑證",
+					"item": [
+						{
+							"name": "upload CA",
+							"item": [
+								{
+									"name": "Login - User Copy",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "1ee699a9-d5e2-4882-a736-3f4c998c002f",
+												"exec": [
+													"// 設定一個在審核可以用來識別的字串, 若沒有的話需要清空",
+													"pm.environment.set(\"identifySymbol\", \"\");",
+													"",
+													"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+													"pm.environment.set(\"functionType\", \"\");",
+													"",
+													"// 主要資料id",
+													"pm.environment.set(\"dataId\", \"\");",
+													"// 相關子模組id",
+													"pm.environment.set(\"subDataId\", \"\");"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN1",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "上傳CA 憑證",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "874f598e-b1a7-40fc-b745-60d21d0f90f0",
+												"exec": [
+													"",
+													"var dataId = 0;",
+													"",
+													"const response = pm.response.json();",
+													"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"AUDITING\" &&",
+													"response.data.id !== undefined) {",
+													"    pm.environment.set(\"auditId\", response.data.id); ",
+													"    var auditId = response.data.id;",
+													"    dataId = response.data.id;",
+													"} else if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+													"response.data.id !== undefined){",
+													"        dataId = response.data.id;",
+													"}",
+													"",
+													"pm.test(\"Create Request Completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    pm.expect(dataId).not.equal(0);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "7bad7b60-6ee5-4b49-a53e-7e44c65743e1",
+												"exec": [
+													"",
+													"// 設定一個在審核可以用來識別的字串, 若沒有的話需要清空",
+													"pm.environment.set(\"identifySymbol\", \"\");",
+													"",
+													"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+													"pm.environment.set(\"functionType\", \"SYS_CA_CERT\");",
+													"",
+													"// 主要資料id",
+													"pm.environment.set(\"dataId\", \"\");",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-csrf-token",
+												"value": "{{acs-csrf-token}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "certificate",
+													"type": "file",
+													"src": "/var/lib/jenkins/workspace/FISC-TEST/build-dev-acs-portal-fisc/src/test/api/attachment/visa_ca.pem"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/certificate-management/ca/visa",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"certificate-management",
+												"ca",
+												"visa"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Login - User2 Copy",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN2",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing - Query All with\bout self",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "500674dd-c2ab-4931-8855-ed7545904c31",
+												"exec": [
+													"const response = pm.response.json();",
+													"var len = response.data.length;",
+													"console.log(response.data)",
+													"var auditId = 0;",
+													"",
+													"var identifySymbol = pm.environment.get(\"identifySymbol\") || \"\";",
+													"console.log(\"identifySymbol: \" + identifySymbol);",
+													"if(identifySymbol.length > 0) {",
+													"    for(var i = 0; i < len; i++) {",
+													"        if(response.data[i].draftContent.indexOf(identifySymbol) < 0) continue;",
+													"           ",
+													"        auditId = response.data[i].auditId;",
+													"        break;",
+													"    }    ",
+													"} else {",
+													"    auditId = response.data[0].auditId;",
+													"}",
+													"pm.globals.set(\"auditId\", auditId)",
+													"",
+													"var functionType = pm.environment.get(\"functionType\"); ",
+													"pm.test(functionType + \" query auditing list completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    ",
+													"    if(identifySymbol !== \"\") {",
+													"        pm.expect(pm.response.text()).to.include(identifySymbol);        ",
+													"    }",
+													"",
+													"    pm.expect(auditId).not.equal(0);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "3a5ff1b7-d067-4783-85d6-25da86db69bb",
+												"exec": [
+													"",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"functionType\": \"{{functionType}}\",\n\t\"issuerBankId\": \"{{orgBankId}}\",\n\t\"page\": 0,\n\t\"pageSize\": 4\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/list",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"list"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing - Signing Create Published",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "2615cf4c-93b1-4f69-8fb5-86888a90d0c4",
+												"exec": [
+													"const response = pm.response.json();",
+													"var dataId = 0;",
+													"",
+													"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+													"response.data.id !== undefined){",
+													"    dataId = response.data.id;",
+													"    pm.environment.set(\"dataId\", response.data.id); ",
+													"}",
+													"",
+													"pm.test(\"Signing Create Approve completed. Data Stored.\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    pm.expect(dataId).not.equal(0);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"auditId\": \"{{auditId}}\",\n    \"issuerBankId\": \"{{orgBankId}}\", \n    \"functionType\": \"{{functionType}}\",\n    \"auditStatus\": \"P\",\n    \"comment\": \"create published\"\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/signing",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"signing"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing List - Without Insert one",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "500674dd-c2ab-4931-8855-ed7545904c31",
+												"exec": [
+													"const response = pm.response.json();",
+													"var len = response.data.length;",
+													"const identifySymbol = pm.environment.get(\"identifySymbol\");",
+													"",
+													"var isAuditItemStillThere = false;",
+													"var auditId = pm.environment.get(\"auditId\"); ",
+													"",
+													"for(var i = 0; i < len; i++) {",
+													"    if(response.data[0].auditId !== auditId) continue;",
+													"    ",
+													"    isAuditItemStillThere = true;",
+													"}",
+													"pm.test(\"Insert Request Removed\", function() {",
+													"    pm.response.to.have.status(200);",
+													"    pm.expect(isAuditItemStillThere).to.equal(false);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "3a5ff1b7-d067-4783-85d6-25da86db69bb",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"functionType\": \"{{functionType}}\",\n\t\"issuerBankId\": \"{{orgBankId}}\",\n\t\"page\": 0,\n\t\"pageSize\": 4\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/list",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"list"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Query CA",
+							"item": [
+								{
+									"name": "查詢CA 憑證",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "b708c4b1-f7c4-469f-9398-be6188b0d922",
+												"exec": [
+													"const response = pm.response.json();",
+													"",
+													"pm.test(\"Query Request Completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    pm.expect(pm.environment.get(\"dataId\")).equal(response.data.id);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"url": {
+											"raw": "{{portal-url}}/auth/certificate-management/ca/visa",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"certificate-management",
+												"ca",
+												"visa"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Delete CA",
+							"item": [
+								{
+									"name": "Login - User",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "9767d514-94b3-41a4-b134-0f0bddad43e6",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN1",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "刪除CA憑證",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "c4a31fef-1dbe-48fe-bcff-009af47be617",
+												"exec": [
+													"const response = pm.response.json();",
+													"var dataId = 0;",
+													"",
+													"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"AUDITING\" &&",
+													"response.data.id !== undefined) {",
+													"    pm.environment.set(\"auditId\", response.data.id); ",
+													"    dataId = response.data.id;",
+													"} else if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+													"response.data.id !== undefined){",
+													"    pm.environment.set(\"dataId\", response.data.id); ",
+													"    dataId = response.data.id;",
+													"}",
+													"",
+													"pm.test(\"Delete Request Completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"id\": {{dataId}}\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/certificate-management/ca/delete",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"certificate-management",
+												"ca",
+												"delete"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Login - User2",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN2",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing - Signing Delete Published",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "03b8c7ef-56b2-4966-836a-f5c23b42cd3d",
+												"exec": [
+													"pm.test(\"Signing Delete Approve completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"auditId\": \"{{auditId}}\",\n    \"issuerBankId\": \"{{issuerBankId}}\", \n    \"functionType\": \"{{functionType}}\",\n    \"auditStatus\": \"P\",\n    \"comment\": \"Delete published\"\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/signing",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"signing"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"_postman_isSubFolder": true
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Signing 憑證",
+					"item": [
+						{
+							"name": "upload Signing 憑證",
+							"item": [
+								{
+									"name": "Login - User",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "bf105eee-0a95-45b8-9d2a-225f71739762",
+												"exec": [
+													"// 設定一個在審核可以用來識別的字串, 若沒有的話需要清空",
+													"pm.environment.set(\"identifySymbol\", \"\");",
+													"",
+													"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+													"pm.environment.set(\"functionType\", \"\");",
+													"",
+													"// 主要資料id",
+													"pm.environment.set(\"dataId\", \"\");",
+													"// 相關子模組id",
+													"pm.environment.set(\"subDataId\", \"\");"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN1",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "上傳Signing 憑證",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "874f598e-b1a7-40fc-b745-60d21d0f90f0",
+												"exec": [
+													"",
+													"var dataId = 0;",
+													"",
+													"const response = pm.response.json();",
+													"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"AUDITING\" &&",
+													"response.data.id !== undefined) {",
+													"    pm.environment.set(\"auditId\", response.data.id); ",
+													"    var auditId = response.data.id;",
+													"    dataId = response.data.id;",
+													"} else if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+													"response.data.id !== undefined){",
+													"        dataId = response.data.id;",
+													"}",
+													"",
+													"pm.test(\"Create Request Completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "7bad7b60-6ee5-4b49-a53e-7e44c65743e1",
+												"exec": [
+													"",
+													"// 設定一個在審核可以用來識別的字串, 若沒有的話需要清空",
+													"pm.environment.set(\"identifySymbol\", \"\");",
+													"",
+													"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+													"pm.environment.set(\"functionType\", \"SYS_SIGNING_CERT\");",
+													"",
+													"// 主要資料id",
+													"pm.environment.set(\"dataId\", \"\");",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "certificateList",
+													"type": "file",
+													"src": "/var/lib/jenkins/workspace/FISC-TEST/build-dev-acs-portal-fisc/src/test/api/attachment/certificate.p7c"
+												},
+												{
+													"key": "cardBrand",
+													"value": "MASTERCARD",
+													"type": "text"
+												},
+												{
+													"key": "issuerBankId",
+													"value": "-1",
+													"type": "text"
+												},
+												{
+													"key": "issuerBankCode",
+													"value": "050",
+													"type": "text"
+												},
+												{
+													"key": "bankId",
+													"value": "1",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/certificate-management/signing/upload",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"certificate-management",
+												"signing",
+												"upload"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Login - User2",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN2",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing - Query All with\bout self",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "500674dd-c2ab-4931-8855-ed7545904c31",
+												"exec": [
+													"const response = pm.response.json();",
+													"var len = response.data.length;",
+													"console.log(response.data)",
+													"var auditId = 0;",
+													"",
+													"var identifySymbol = pm.environment.get(\"identifySymbol\") || \"\";",
+													"console.log(\"identifySymbol: \" + identifySymbol);",
+													"if(identifySymbol.length > 0) {",
+													"    for(var i = 0; i < len; i++) {",
+													"        if(response.data[i].draftContent.indexOf(identifySymbol) < 0) continue;",
+													"           ",
+													"        auditId = response.data[i].auditId;",
+													"        break;",
+													"    }    ",
+													"} else {",
+													"    auditId = response.data[0].auditId;",
+													"}",
+													"pm.globals.set(\"auditId\", auditId)",
+													"",
+													"var functionType = pm.environment.get(\"functionType\"); ",
+													"pm.test(functionType + \" query auditing list completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    ",
+													"    if(identifySymbol !== \"\") {",
+													"        pm.expect(pm.response.text()).to.include(identifySymbol);        ",
+													"    }",
+													"",
+													"    pm.expect(auditId).not.equal(0);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "3a5ff1b7-d067-4783-85d6-25da86db69bb",
+												"exec": [
+													"",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"functionType\": \"{{functionType}}\",\n\t\"issuerBankId\": \"{{orgBankId}}\",\n\t\"page\": 0,\n\t\"pageSize\": 4\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/list",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"list"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing - Signing Create Published",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "2615cf4c-93b1-4f69-8fb5-86888a90d0c4",
+												"exec": [
+													"const response = pm.response.json();",
+													"var dataId = 0;",
+													"",
+													"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+													"response.data.id !== undefined){",
+													"    dataId = response.data.id;",
+													"    pm.environment.set(\"dataId\", response.data.id); ",
+													"}",
+													"",
+													"pm.test(\"Signing Create Approve completed. Data Stored.\", function(){",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"auditId\": \"{{auditId}}\",\n    \"issuerBankId\": \"{{orgBankId}}\", \n    \"functionType\": \"{{functionType}}\",\n    \"auditStatus\": \"P\",\n    \"comment\": \"create published\"\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/signing",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"signing"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing List - Without Insert one",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "500674dd-c2ab-4931-8855-ed7545904c31",
+												"exec": [
+													"const response = pm.response.json();",
+													"var len = response.data.length;",
+													"const identifySymbol = pm.environment.get(\"identifySymbol\");",
+													"",
+													"var isAuditItemStillThere = false;",
+													"var auditId = pm.environment.get(\"auditId\"); ",
+													"",
+													"for(var i = 0; i < len; i++) {",
+													"    if(response.data[0].auditId !== auditId) continue;",
+													"    ",
+													"    isAuditItemStillThere = true;",
+													"}",
+													"pm.test(\"Insert Request Removed\", function() {",
+													"    pm.response.to.have.status(200);",
+													"    pm.expect(isAuditItemStillThere).to.equal(false);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "3a5ff1b7-d067-4783-85d6-25da86db69bb",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"functionType\": \"{{functionType}}\",\n\t\"issuerBankId\": \"{{orgBankId}}\",\n\t\"page\": 0,\n\t\"pageSize\": 4\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/list",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"list"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "query signing 憑證",
+							"item": [
+								{
+									"name": "查詢signing 憑證",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "b708c4b1-f7c4-469f-9398-be6188b0d922",
+												"exec": [
+													"const response = pm.response.json();",
+													"",
+													"pm.test(\"Query Request Completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"cardBrand\" : \"VISA\",\n\t\"issuerBankId\" : 1\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/certificate-management/signing",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"certificate-management",
+												"signing"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"_postman_isSubFolder": true
+						}
+					],
+					"_postman_isSubFolder": true
+				}
+			]
+		},
+		{
+			"name": "System Setting",
+			"item": [
+				{
+					"name": "發卡行商標 - 給交易使用",
+					"item": [
+						{
+							"name": "Query",
+							"item": [
+								{
+									"name": "Login - User1",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "63ace727-b780-40a3-9ebf-7966ab72366e",
+												"exec": [
+													"// 設定一個在審核可以用來識別的字串, 若沒有的話需要清空",
+													"pm.environment.set(\"identifySymbol\", \"\");",
+													"",
+													"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+													"pm.environment.set(\"functionType\", \"\");",
+													"",
+													"// 主要資料id",
+													"pm.environment.set(\"dataId\", \"\");",
+													"// 相關子模組id",
+													"pm.environment.set(\"subDataId\", \"\");"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN1",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "取得發卡行logo",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "7a757c8e-9671-4b30-bec7-afc85e5a9bb8",
+												"exec": [
+													"var functionType = pm.environment.get(\"functionType\"); ",
+													"pm.test(functionType + \"query success\", function(){",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "f1d94d2c-eb63-4bd9-af6d-09f1874a975b",
+												"exec": [
+													"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+													"pm.environment.set(\"functionType\", \"SYS_ISSUER_LOGO\");",
+													"",
+													"pm.environment.set(\"issuerLogoBankId\", 1);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "formdata",
+											"formdata": []
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/system-setting/issuer/logo/{{issuerLogoBankId}}",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"system-setting",
+												"issuer",
+												"logo",
+												"{{issuerLogoBankId}}"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Update",
+							"item": [
+								{
+									"name": "Login - User1",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);",
+													"pm.environment.set(\"functionType\", \"SYS_ISSUER_LOGO\"); "
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN1",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "更新卡行logo",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "7a757c8e-9671-4b30-bec7-afc85e5a9bb8",
+												"exec": [
+													" const response = pm.response.json();",
+													"var dataId = 0;",
+													"",
+													"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"AUDITING\" &&",
+													"response.data.id !== undefined) {",
+													"    pm.environment.set(\"auditId\", response.data.id); ",
+													"    dataId = response.data.id;",
+													"} else if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+													"response.data.id !== undefined){",
+													"    pm.environment.set(\"dataId\", response.data.id); ",
+													"    dataId = response.data.id;",
+													"}",
+													"",
+													"pm.test(\"Update Request Completed.\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    pm.expect(dataId).not.equal(0);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "f1d94d2c-eb63-4bd9-af6d-09f1874a975b",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "logo",
+													"type": "file",
+													"src": "/var/lib/jenkins/workspace/FISC-TEST/build-dev-acs-portal-fisc/src/test/api/attachment/money.jpg"
+												},
+												{
+													"key": "id",
+													"value": "{{issuerLogoBankId}}",
+													"type": "text"
+												},
+												{
+													"key": "issuerBankId",
+													"value": "{{issuerBankId}}",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/system-setting/issuer/logo/update",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"system-setting",
+												"issuer",
+												"logo",
+												"update"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Login - User2",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);",
+													"pm.environment.set(\"issuerBankId\", response.data.issuerBankId);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN2",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing - Query All with\bout self",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "500674dd-c2ab-4931-8855-ed7545904c31",
+												"exec": [
+													"const response = pm.response.json();",
+													"var len = response.data.length;",
+													"var auditId = 0;",
+													"",
+													"var identifySymbol = pm.environment.get(\"identifySymbol\") || \"\";",
+													"",
+													"if(identifySymbol.length > 0) {",
+													"    for(var i = 0; i < len; i++) {",
+													"        if(response.data[i].draftContent.indexOf(identifySymbol) < 0) continue;",
+													"           ",
+													"        auditId = response.data[i].auditId;",
+													"        break;",
+													"    }    ",
+													"} else {",
+													"    auditId = response.data[0].auditId;",
+													"}",
+													"",
+													"",
+													"var functionType = pm.environment.get(\"functionType\"); ",
+													"pm.test(functionType + \" query auditing list completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    ",
+													"    if(identifySymbol !== \"\") {",
+													"        pm.expect(pm.response.text()).to.include(identifySymbol);        ",
+													"    }",
+													"",
+													"    pm.expect(auditId).not.equal(0);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "3a5ff1b7-d067-4783-85d6-25da86db69bb",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"functionType\": \"{{functionType}}\",\n\t\"issuerBankId\": \"{{orgBankId}}\",\n\t\"page\": 0,\n\t\"pageSize\": 4\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/list",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"list"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing - Signing Update Published Copy",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "e11500cd-7a1f-4753-a9a6-83e4987144f2",
+												"exec": [
+													"const response = pm.response.json();",
+													"var dataId = 0;",
+													"",
+													"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+													"response.data.id !== undefined) {",
+													"    pm.globals.set(\"dataId\", response.data.id); ",
+													"    dataId = response.data.id;",
+													"    console.log(\"dataId: \" + dataId);",
+													"}",
+													"",
+													"pm.test(\"Sign Update Completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    pm.expect(dataId).not.equal(0);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"auditId\": \"{{auditId}}\",\n    \"issuerBankId\": \"{{orgBankId}}\", \n    \"functionType\": \"{{functionType}}\",\n    \"auditStatus\": \"P\",\n    \"comment\": \"update published\"\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/signing",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"signing"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Bank",
+			"item": [
+				{
+					"name": "發卡銀行商標 - 給Portal使用",
+					"item": [
+						{
+							"name": "Query",
+							"item": [
+								{
+									"name": "Login - User1",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "63ace727-b780-40a3-9ebf-7966ab72366e",
+												"exec": [
+													"// 設定一個在審核可以用來識別的字串, 若沒有的話需要清空",
+													"pm.environment.set(\"identifySymbol\", \"\");",
+													"",
+													"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+													"pm.environment.set(\"functionType\", \"\");",
+													"",
+													"// 主要資料id",
+													"pm.environment.set(\"dataId\", \"\");",
+													"// 相關子模組id",
+													"pm.environment.set(\"subDataId\", \"\");"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN1",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "取得發卡行logo",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "7a757c8e-9671-4b30-bec7-afc85e5a9bb8",
+												"exec": [
+													"var functionType = pm.environment.get(\"functionType\"); ",
+													"pm.test(functionType + \"query success\", function(){",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "f1d94d2c-eb63-4bd9-af6d-09f1874a975b",
+												"exec": [
+													"// 測試的模組名稱 (對應Enum AuditFunctionType)",
+													"pm.environment.set(\"functionType\", \"BANK_LOGO\");",
+													"",
+													"pm.environment.set(\"issuerLogoBankId\", 1);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"issuerBankId\": \"{{issuerLogoBankId}}\"\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/bank-management/logo",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"bank-management",
+												"logo"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Update",
+							"item": [
+								{
+									"name": "Login - User1",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);",
+													"pm.environment.set(\"functionType\", \"BANK_LOGO\");"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN1",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "更新發卡行logo",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "7a757c8e-9671-4b30-bec7-afc85e5a9bb8",
+												"exec": [
+													" const response = pm.response.json();",
+													"var dataId = 0;",
+													"",
+													"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"AUDITING\" &&",
+													"response.data.id !== undefined) {",
+													"    pm.environment.set(\"auditId\", response.data.id); ",
+													"    dataId = response.data.id;",
+													"} else if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+													"response.data.id !== undefined){",
+													"    pm.environment.set(\"dataId\", response.data.id); ",
+													"    dataId = response.data.id;",
+													"}",
+													"",
+													"pm.test(\"Update Request Completed.\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    pm.expect(dataId).not.equal(0);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "f1d94d2c-eb63-4bd9-af6d-09f1874a975b",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "image",
+													"type": "file",
+													"src": "/var/lib/jenkins/workspace/FISC-TEST/build-dev-acs-portal-fisc/src/test/api/attachment/money.jpg"
+												},
+												{
+													"key": "issuerBankId",
+													"value": "{{issuerLogoBankId}}",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/bank-management/logo/update",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"bank-management",
+												"logo",
+												"update"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Login - User2",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c5b2eb4-fa83-43eb-8294-948d51f17d26",
+												"exec": [
+													"const response = pm.response.json();",
+													"pm.globals.set(\"acs-csrf-token\", response.data.csrf_token);",
+													"pm.environment.set(\"issuerBankId\", response.data.issuerBankId);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/x-www-form-urlencoded"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "account",
+													"value": "SYSTEMADMIN2",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/login",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing - Query All with\bout self",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "500674dd-c2ab-4931-8855-ed7545904c31",
+												"exec": [
+													"const response = pm.response.json();",
+													"var len = response.data.length;",
+													"var auditId = 0;",
+													"",
+													"var identifySymbol = pm.environment.get(\"identifySymbol\") || \"\";",
+													"",
+													"if(identifySymbol.length > 0) {",
+													"    for(var i = 0; i < len; i++) {",
+													"        if(response.data[i].draftContent.indexOf(identifySymbol) < 0) continue;",
+													"           ",
+													"        auditId = response.data[i].auditId;",
+													"        break;",
+													"    }    ",
+													"} else {",
+													"    auditId = response.data[0].auditId;",
+													"}",
+													"",
+													"",
+													"var functionType = pm.environment.get(\"functionType\"); ",
+													"pm.test(functionType + \" query auditing list completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    ",
+													"    if(identifySymbol !== \"\") {",
+													"        pm.expect(pm.response.text()).to.include(identifySymbol);        ",
+													"    }",
+													"",
+													"    pm.expect(auditId).not.equal(0);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "3a5ff1b7-d067-4783-85d6-25da86db69bb",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"functionType\": \"{{functionType}}\",\n\t\"issuerBankId\": \"{{orgBankId}}\",\n\t\"page\": 0,\n\t\"pageSize\": 4\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/list",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"list"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Auditing - Signing Update Published Copy",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "e11500cd-7a1f-4753-a9a6-83e4987144f2",
+												"exec": [
+													"const response = pm.response.json();",
+													"var dataId = 0;",
+													"",
+													"if(response.data !== undefined && response.data.status !== undefined && response.data.status === \"STORED\" &&",
+													"response.data.id !== undefined) {",
+													"    pm.globals.set(\"dataId\", response.data.id); ",
+													"    dataId = response.data.id;",
+													"    console.log(\"dataId: \" + dataId);",
+													"}",
+													"",
+													"pm.test(\"Sign Update Completed\", function(){",
+													"    pm.response.to.have.status(200);",
+													"    pm.expect(dataId).not.equal(0);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "x-csrf-token",
+												"type": "text",
+												"value": "{{acs-csrf-token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"auditId\": \"{{auditId}}\",\n    \"issuerBankId\": \"{{orgBankId}}\", \n    \"functionType\": \"{{functionType}}\",\n    \"auditStatus\": \"P\",\n    \"comment\": \"update published\"\n}"
+										},
+										"url": {
+											"raw": "{{portal-url}}/auth/auditing/signing",
+											"host": [
+												"{{portal-url}}"
+											],
+											"path": [
+												"auth",
+												"auditing",
+												"signing"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="war" name="ocean-acs-portal">
+    <property environment="env"/>
+    <property name="spring-boot.version" value="2.1.3.RELEASE"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.8"/>
+    <property name="source" value="1.8"/>
+    <property name="resources.dir" value="resources"/>
+    <property name="dest.dir" value="target"/>
+
+    <path id="ocean-acs-portal.classpath">
+        <pathelement location="build/classes/java/main"/>
+        <pathelement location="gradle/wrapper/gradle-wrapper.jar"/>
+        <fileset dir="export-libs">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="clean">
+        <delete dir="dist"/>
+        <delete dir="build"/>
+    </target>
+
+    <target name="init" depends="clean">
+        <mkdir dir="build/classes/java/main"/>
+<!--        <copy includeemptydirs="false" todir="build/classes/java/main">-->
+<!--            <fileset dir="src/main/java">-->
+<!--                <include name="**/*.java"/>-->
+<!--            </fileset>-->
+<!--        </copy>-->
+<!--        <copy includeemptydirs="false" todir="build/classes/java/main">-->
+<!--            <fileset dir="src/test/java">-->
+<!--                <exclude name="**/*.java"/>-->
+<!--            </fileset>-->
+<!--        </copy>-->
+    </target>
+
+    <target name="build-project" depends="init">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <echo message="Source:${source}"/>
+        <javac encoding="UTF-8" debug="true" debuglevel="${debuglevel}" destdir="build/classes/java/main" includeantruntime="false"
+               source="${source}" target="${target}">
+            <src path="src/main/java"/>
+            <src path="src/test/java"/>
+            <classpath refid="ocean-acs-portal.classpath"/>
+        </javac>
+    </target>
+
+    <target name="war" depends="build-project">
+        <war destfile="build/libs/${ant.project.name}.war" needxmlfile='false'>
+            <mappedresources>
+                <fileset dir="build/classes/java/main"/>
+                <globmapper from="*" to="WEB-INF/classes/*"/>
+            </mappedresources>
+            <mappedresources>
+                <fileset dir="src/main/resources" erroronmissingdir="false"/>
+                <globmapper from="*" to="WEB-INF/classes/*"/>
+            </mappedresources>
+            <mappedresources>
+                <fileset dir="libs">
+                    <include name="*.jar"/>
+                </fileset>
+                <globmapper from="*" to="WEB-INF/lib/*"/>
+            </mappedresources>
+            <mappedresources>
+                <fileset dir="src/main/webapp/WEB-INF" erroronmissingdir="false"/>
+                <globmapper from="*" to="WEB-INF/*"/>
+            </mappedresources>
+            <zipfileset src="libs/spring-boot-loader-${spring-boot.version}.jar"/>
+            <manifest>
+                <attribute name="Main-Class" value="org.springframework.boot.loader.JarLauncher"/>
+                <attribute name="Start-Class" value="org.springframework.boot.loader.WarLauncher"/>
+            </manifest>
+        </war>
+    </target>
+
+    <target name="src-package">
+        <zip destfile="src.zip"
+             basedir="src"
+             update="true"
+             excludes="main/resources/application.properties,
+                       main/resources/application-sample.properties,
+                       main/resources/application-test.properties,
+                       main/resources/banner.txt,
+                       main/resources/log4j2-dev.xml,
+                       main/resources/log4j2-prod.xml"/>
+    </target>
+</project>

@@ -1,0 +1,367 @@
+dn: dc=springframework,dc=org
+objectclass: top
+objectclass: domain
+objectclass: extensibleObject
+dc: springframework
+
+dn: ou=groups,dc=springframework,dc=org
+objectclass: top
+objectclass: organizationalUnit
+ou: groups
+
+dn: ou=subgroups,ou=groups,dc=springframework,dc=org
+objectclass: top
+objectclass: organizationalUnit
+ou: subgroups
+
+dn: ou=riskcontrol,ou=groups,dc=springframework,dc=org
+objectclass: top
+objectclass: organizationalUnit
+ou: riskcontrol
+
+dn: ou=custombersupport,ou=groups,dc=springframework,dc=org
+objectclass: top
+objectclass: organizationalUnit
+ou: custombersupport
+
+dn: ou=adminoffice,ou=groups,dc=springframework,dc=org
+objectclass: top
+objectclass: organizationalUnit
+ou: adminoffice
+
+dn: ou=everyone,ou=groups,dc=springframework,dc=org
+objectclass: top
+objectclass: organizationalUnit
+ou: everyone
+
+dn: ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: organizationalUnit
+ou: people
+
+dn: ou=space cadets,dc=springframework,dc=org
+objectclass: top
+objectclass: organizationalUnit
+ou: space cadets
+
+dn: ou=\"quoted people\",dc=springframework,dc=org
+objectclass: top
+objectclass: organizationalUnit
+ou: "quoted people"
+
+dn: ou=otherpeople,dc=springframework,dc=org
+objectclass: top
+objectclass: organizationalUnit
+ou: otherpeople
+
+dn: uid=ben,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Ben Alex
+sn: Alex
+uid: ben
+userPassword: $2y$12$WFSS8AcpSBe.d0qhIWYhlOwwwLJurMndyeMr6IP/WYe9cZQVDeFOS
+
+dn: uid=bob,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Bob Hamilton
+sn: Hamilton
+uid: bob
+userPassword: $2y$12$LTNlMOuFCjSeoLrCdZiv7OjofLpBd8H2kY4uV/UBbpXlVSLyKsgF.
+
+dn: uid=joe,ou=otherpeople,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Joe Smeth
+sn: Smeth
+uid: joe
+userPassword: joespassword
+
+dn: cn=mouse\, jerry,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Mouse, Jerry
+sn: Mouse
+uid: jerry
+userPassword: jerryspassword
+
+dn: cn=slash/guy,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: slash/guy
+sn: Slash
+uid: slashguy
+userPassword: slashguyspassword
+
+dn: cn=quote\"guy,ou=\"quoted people\",dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: quote\"guy
+sn: Quote
+uid: quoteguy
+userPassword: quoteguyspassword
+
+dn: uid=space cadet,ou=space cadets,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Space Cadet
+sn: Cadet
+uid: space cadet
+userPassword: spacecadetspassword
+
+### cherri people - start ###
+
+dn: uid=ccadmin,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Cherri Corp. Admin
+sn: Admin
+uid: ccadmin
+userPassword: pw1774!@
+#password: pw1774!@
+
+dn: uid=customer01,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Risk 01
+sn: Risk 01
+uid: customer01
+userPassword: pw1774!@
+#password: pw1774!@
+
+dn: uid=customer02,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Risk 01
+sn: Risk 01
+uid: customer02
+userPassword: pw1774!@
+#password: pw1774!@
+
+dn: uid=risk01,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Risk 01
+sn: Risk 01
+uid: risk01
+userPassword: pw1774!@
+#password: pw1774!@
+
+dn: uid=risk02,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Risk 02
+sn: Risk 02
+uid: risk02
+userPassword: pw1774!@
+#password: pw1774!@
+
+dn: uid=it01,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: IT 9583
+sn: IT 9583
+uid: it01
+userPassword: pw1774!@
+#password: pw1774!@
+
+dn: uid=it02,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: IT 9583
+sn: IT 9583
+uid: it02
+userPassword: pw1774!@
+#password: pw1774!@
+
+dn: uid=Alan,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: IT 9583
+sn: IT 9583
+uid: Alan
+userPassword: 1qaz@WSX
+#password: 1qaz@WSX
+
+dn: uid=Alan2,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: IT 9583
+sn: IT 9583
+uid: Alan2
+userPassword: 1qaz@WSX
+#password: 1qaz@WSX
+
+
+dn: uid=ccadmin01,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: IT 9583
+sn: IT 9583
+uid: ccadmin01
+userPassword: pw1774!@
+#password: pw1774!@
+
+dn: uid=ccadmin02,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: IT 9583
+sn: IT 9583
+uid: ccadmin02
+userPassword: pw1774!@
+#password: pw1774!@
+
+dn: uid=support01,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Support 01
+sn: Support 01
+uid: support01
+userPassword: pw1774!@
+#password: pw1774!@
+
+dn: uid=support02,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Support 02
+sn: Support 02
+uid: support02
+userPassword: pw1774!@
+#password: pw1774!@
+
+dn: uid=stranger01,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Stranger 01
+sn: Stranger 01
+uid: stranger01
+userPassword: pw1774!@
+#password: pw1774!@
+
+dn: uid=stranger02,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Stranger 02
+sn: Stranger 02
+uid: stranger02
+userPassword: pw1774!@
+#password: pw1774!@
+
+### cherri people - end ###
+
+dn: cn=developers,ou=groups,dc=springframework,dc=org
+objectclass: top
+objectclass: groupOfUniqueNames
+cn: developers
+ou: developer
+uniqueMember: uid=ben,ou=people,dc=springframework,dc=org
+uniqueMember: uid=bob,ou=people,dc=springframework,dc=org
+
+dn: cn=managers,ou=groups,dc=springframework,dc=org
+objectclass: top
+objectclass: groupOfUniqueNames
+cn: managers
+ou: manager
+uniqueMember: uid=ben,ou=people,dc=springframework,dc=org
+uniqueMember: cn=mouse\, jerry,ou=people,dc=springframework,dc=org
+
+dn: cn=submanagers,ou=subgroups,ou=groups,dc=springframework,dc=org
+objectclass: top
+objectclass: groupOfUniqueNames
+cn: submanagers
+ou: submanager
+uniqueMember: uid=ben,ou=people,dc=springframework,dc=org
+
+### cherri relation edge - start ###
+dn: cn=riskcontrol,ou=groups,dc=springframework,dc=org
+objectclass: top
+objectclass: groupOfUniqueNames
+cn: riskcontrol
+ou: developer
+uniqueMember: uid=risk01,ou=people,dc=springframework,dc=org
+uniqueMember: uid=risk02,ou=people,dc=springframework,dc=org
+uniqueMember: uid=it01,ou=people,dc=springframework,dc=org
+uniqueMember: uid=it02,ou=people,dc=springframework,dc=org
+
+dn: cn=custombersupport,ou=groups,dc=springframework,dc=org
+objectclass: top
+objectclass: groupOfUniqueNames
+cn: custombersupport
+ou: developer
+uniqueMember: uid=support01,ou=people,dc=springframework,dc=org
+uniqueMember: uid=support02,ou=people,dc=springframework,dc=org
+uniqueMember: uid=it01,ou=people,dc=springframework,dc=org
+uniqueMember: uid=it02,ou=people,dc=springframework,dc=org
+
+dn: cn=adminoffice,ou=groups,dc=springframework,dc=org
+objectclass: top
+objectclass: groupOfUniqueNames
+cn: adminoffice
+ou: developer
+uniqueMember: uid=ccadmin01,ou=people,dc=springframework,dc=org
+uniqueMember: uid=ccadmin02,ou=people,dc=springframework,dc=org
+uniqueMember: uid=it01,ou=people,dc=springframework,dc=org
+uniqueMember: uid=it02,ou=people,dc=springframework,dc=org
+
+dn: cn=everyone,ou=groups,dc=springframework,dc=org
+objectclass: top
+objectclass: groupOfUniqueNames
+cn: everyone
+ou: developer
+uniqueMember: uid=ccadmin01,ou=people,dc=springframework,dc=org
+uniqueMember: uid=ccadmin02,ou=people,dc=springframework,dc=org
+uniqueMember: uid=risk01,ou=people,dc=springframework,dc=org
+uniqueMember: uid=risk02,ou=people,dc=springframework,dc=org
+uniqueMember: uid=support01,ou=people,dc=springframework,dc=org
+uniqueMember: uid=support02,ou=people,dc=springframework,dc=org
+uniqueMember: uid=it01,ou=people,dc=springframework,dc=org
+uniqueMember: uid=it02,ou=people,dc=springframework,dc=org
+uniqueMember: uid=stranger01,ou=people,dc=springframework,dc=org
+uniqueMember: uid=stranger02,ou=people,dc=springframework,dc=org
+### cherri relation edge - end ###
+
